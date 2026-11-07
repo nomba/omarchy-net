@@ -1,17 +1,17 @@
 {
   "dns": {
     "servers": [
-      { "type": "tcp", "server": "1.1.1.1", "tag": "remote" }
+      { "type": "tcp", "server": "1.1.1.1", "tag": "remote", "detour": "proxy" }
     ]
   },
   "inbounds": [
     {
       "type": "tun",
       "interface_name": "tun0",
+      "stack": "system",
       "address": ["172.19.0.1/30"],
       "auto_route": true,
-      "strict_route": true,
-      "sniff": true
+      "strict_route": true
     }
   ],
   "outbounds": [
@@ -19,6 +19,7 @@
   ],
   "route": {
     "rules": [
+      { "action": "sniff" },
       { "protocol": "dns", "action": "hijack-dns" }
     ],
     "final": "proxy",

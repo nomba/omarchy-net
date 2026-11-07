@@ -64,11 +64,15 @@ bash install-guest.sh
 | Проверка (в госте) | Ожидание |
 |---|---|
 | `curl https://api.ipify.org` | IP VDS |
-| `curl -I https://www.ozon.ru` / `wildberries.ru` | работает, выход с домашнего IP |
+| `curl -I https://www.ozon.ru` / `wildberries.ru` | есть HTTP-ответ, выход с домашнего IP (сейчас сайты могут отвечать 307/498) |
 | `ssh -T git@github.com` | `Hi <user>! ...` |
-| `ping -c2 8.8.8.8` | 100% потерь |
-| `sudo nc -zv -w3 1.1.1.1 443` | нет соединения (даже под sudo) |
+| `ping -c2 -I enp0s5 8.8.8.8` | 100% потерь при принудительном прямом выходе |
+| `sudo nc -zv -w3 1.1.1.1 443` | соединение успешно через `outbound/socks[proxy]` |
+| TCP с `SO_BINDTODEVICE=enp0s5` к `1.1.1.1:443` | таймаут, включая запуск под sudo |
 | `sudo systemctl stop sing-box && curl -m 5 https://api.ipify.org` | таймаут = kill switch работает |
+
+Обычные `ping` и `nc` не проверяют прямой выход: они перехватываются TUN. Для проверки
+утечки нужно явно привязать сокет к физическому `enp0s5`; при этом файрвол обязан её закрыть.
 
 Per-app настройки не нужны: `HTTP_PROXY`, `git config http.proxy`, `ProxyCommand` в ssh,
 `XferCommand` в pacman.conf — всё это удалите, если настраивали раньше.

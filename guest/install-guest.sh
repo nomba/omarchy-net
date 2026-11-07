@@ -10,10 +10,21 @@ cd "$(dirname "$0")"
 PORT=$(python3 -c "import json;print(json.load(open('../settings.json'))['socksPort'])")
 echo ">> SOCKS-порт хоста: $PORT"
 
-sudo pacman -Sy --needed --noconfirm sing-box nftables python
+tmpdir=$(mktemp -d)
+trap 'rm -rf "$tmpdir"' EXIT
+sed "s/__SOCKS_PORT__/$PORT/g" sing-box.json.tpl > "$tmpdir/sing-box.json"
+sed "s/__SOCKS_PORT__/$PORT/g" nftables.conf.tpl > "$tmpdir/nftables.conf"
+sudo install -D -m644 "$tmpdir/sing-box.json" /etc/sing-box/config.json
+sudo install -D -m644 "$tmpdir/nftables.conf" /etc/nftables.conf
 
-sudo install -D -m644 <(sed "s/__SOCKS_PORT__/$PORT/g" sing-box.json.tpl) /etc/sing-box/config.json
-sudo install -D -m644 <(sed "s/__SOCKS_PORT__/$PORT/g" nftables.conf.tpl) /etc/nftables.conf
+# При повторном запуске файрвол уже активен: сначала загружаем новые правила
+# и восстанавливаем прокси, чтобы pacman не требовал временный прямой доступ.
+if command -v sing-box >/dev/null 2>&1 && command -v nft >/dev/null 2>&1; then
+    sudo nft flush ruleset
+    sudo nft -f /etc/nftables.conf
+    sudo systemctl restart sing-box
+fi
+sudo pacman -Sy --needed --noconfirm sing-box nftables python openbsd-netcat
 
 sudo nft flush ruleset
 sudo nft -f /etc/nftables.conf
@@ -24,4 +35,4 @@ echo
 echo 'OK. Проверки:'
 echo '  curl https://api.ipify.org        -> IP VDS'
 echo '  curl -I https://www.ozon.ru       -> работает (direct делает хост)'
-echo '  ping -c2 8.8.8.8                  -> 100% потерь (прямой выход закрыт)'
+echo '  ping -c2 -I enp0s5 8.8.8.8        -> 100% потерь (прямой выход закрыт)'

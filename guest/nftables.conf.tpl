@@ -1,4 +1,6 @@
-# ГЛАВНОЕ УСЛОВИЕ: гость может отправлять пакеты только на SOCKS-порт хоста.
+# ГЛАВНОЕ УСЛОВИЕ: из физического интерфейса гостя разрешён только SOCKS-порт хоста.
+# tun0 — внутренний интерфейс sing-box, а не прямой выход; без него output policy drop
+# отбрасывает трафик до обработки TUN. После остановки sing-box tun0 исчезает.
 # Никаких DNS-исключений, никаких исключений по UID, никакого direct.
 # Даже root в госте не может уйти мимо прокси, не меняя этих правил.
 
@@ -8,6 +10,7 @@ table inet filter {
         oifname "lo" accept
         ct state established,related accept
         udp sport 68 udp dport 67 accept
+        oifname "tun0" accept
         ip daddr 10.0.2.2 tcp dport __SOCKS_PORT__ accept
     }
 }

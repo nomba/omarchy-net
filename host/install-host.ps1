@@ -40,12 +40,16 @@ $config = [ordered]@{
         @{ type = 'direct'; tag = 'direct' }
     )
     route = [ordered]@{
-        rules = @(@{ domain_suffix = $s.ruDomains; outbound = 'direct' })
+        rules = @(@{ action = 'sniff' })
         final = 'vds'
         auto_detect_interface = $true
     }
 }
-$config | ConvertTo-Json -Depth 10 | Set-Content "$dir\config.json" -Encoding utf8
+if (@($s.ruDomains).Count -gt 0) {
+    $config.route.rules += @{ domain_suffix = $s.ruDomains; outbound = 'direct' }
+}
+$json = $config | ConvertTo-Json -Depth 10
+[System.IO.File]::WriteAllText("$dir\config.json", $json, [System.Text.UTF8Encoding]::new($false))
 
 # --- 3. задача планировщика ---
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' `
@@ -57,7 +61,13 @@ Register-ScheduledTask -TaskName 'OmarchyProxy' -Action $action -Trigger $trigge
 # перезапуск, чтобы подхватить новый конфиг
 Stop-ScheduledTask -TaskName 'OmarchyProxy' -ErrorAction SilentlyContinue
 Start-Sleep 1
-Get-Process sing-box -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Get-CimInstance Win32_Process -Filter "Name='sing-box.exe'" |
+    Where-Object { $_.ExecutablePath -eq $exePath } |
+    ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+$forward = "127.0.0.1:$($s.tunnelPort):127.0.0.1:$($s.vdsProxyPort)"
+Get-CimInstance Win32_Process -Filter "Name='ssh.exe'" |
+    Where-Object { ([string]$_.CommandLine).Contains($forward) -and ([string]$_.CommandLine).Contains([string]$s.vdsHost) } |
+    ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
 Start-ScheduledTask -TaskName 'OmarchyProxy'
 Start-Sleep 3
 

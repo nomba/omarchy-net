@@ -1,0 +1,5 @@
+# bash и конфиги для гостя — строго LF, иначе сломаются при переносе в Linux-гостя
+*.sh    text eol=lf
+*.tpl   text eol=lf
+*.ps1   text eol=crlf
+*.json  text eol=lf

@@ -1,0 +1,9 @@
+{
+  "vdsHost": "root@YOUR_VDS_IP",
+  "vdsProxyPort": 8888,
+  "tunnelPort": 8080,
+  "socksPort": 10809,
+  "singBoxVersion": "1.14.4",
+  "singBoxSha256": "99185D75D314A07DBBA4A130C8AD986CBEB629A07927975636B341CA61F991DF",
+  "ruDomains": [ "ozon.ru", "ozone.ru", "wildberries.ru", "wb.ru", "wbbasket.ru", "wbstatic.net" ]
+}

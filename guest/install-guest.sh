@@ -24,15 +24,20 @@ if command -v sing-box >/dev/null 2>&1 && command -v nft >/dev/null 2>&1; then
     sudo nft -f /etc/nftables.conf
     sudo systemctl restart sing-box
 fi
-sudo pacman -Sy --needed --noconfirm sing-box nftables python openbsd-netcat
+sudo pacman -Sy --needed --noconfirm sing-box nftables python curl openbsd-netcat
 
 sudo nft flush ruleset
 sudo nft -f /etc/nftables.conf
 sudo systemctl enable --now sing-box nftables
 sudo systemctl restart sing-box
 
+# Явные координаты не дают wttr.in подставить ошибочный город из своей GeoIP-базы.
+bash ./configure-location.sh
+
 echo
 echo 'OK. Проверки:'
 echo '  curl https://api.ipify.org        -> IP VDS'
 echo '  curl -I https://www.ozon.ru       -> работает (direct делает хост)'
+echo '  timedatectl                       -> часовой пояс VDS'
+echo '  omarchy-weather-status            -> город VDS, не GeoIP от wttr.in'
 echo '  ping -c2 -I enp0s5 8.8.8.8        -> 100% потерь (прямой выход закрыт)'

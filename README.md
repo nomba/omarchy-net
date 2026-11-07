@@ -59,11 +59,39 @@ cd /mnt/host/guest
 bash install-guest.sh
 ```
 
+## Время и геолокация по VDS
+
+Гостевой установщик получает через `https://ipinfo.io/json` внешний IP, город, координаты и
+часовой пояс. Ответ принимается только если внешний IP совпадает с `vdsHost` из `settings.json`.
+Затем `configure-location.sh`:
+
+- устанавливает часовой пояс через `timedatectl`;
+- сохраняет город и координаты через `omarchy-weather-location --set`.
+
+Меняется часовой пояс, а не абсолютное системное время. NTP использует UDP/123 и через
+HTTP CONNECT-туннель не проходит; ради него нельзя добавлять direct-исключение в kill switch.
+
+Явные координаты важны: без них Omarchy спрашивает город у `wttr.in`, чья GeoIP-база может
+ошибочно показывать российский город для VDS. После настройки виджет использует сохранённое
+местоположение, а не автоопределение `wttr.in`.
+
+После смены VDS или для повторной настройки выполните в госте:
+
+```bash
+cd /mnt/host/guest
+bash configure-location.sh
+```
+
+Команда запрашивает sudo для системного часового пояса и перезаписывает ручной город погоды.
+Для диагностики: `timedatectl`, `omarchy-weather-location` и `omarchy-weather-status`.
+
 ## Проверка после установки
 
 | Проверка (в госте) | Ожидание |
 |---|---|
 | `curl https://api.ipify.org` | IP VDS |
+| `timedatectl` | часовой пояс из GeoIP VDS |
+| `omarchy-weather-location` / `omarchy-weather-status` | город VDS, без ошибочного RU-города от `wttr.in` |
 | `curl -I https://www.ozon.ru` / `wildberries.ru` | есть HTTP-ответ, выход с домашнего IP (сейчас сайты могут отвечать 307/498) |
 | `ssh -T git@github.com` | `Hi <user>! ...` |
 | `ping -c2 -I enp0s5 8.8.8.8` | 100% потерь при принудительном прямом выходе |

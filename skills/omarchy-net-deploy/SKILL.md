@@ -51,6 +51,10 @@ HAPP и прочие Windows-приложения независимы: не м�
    В госте репозиторий появится в `/mnt/host`.
 5. Гость: `cd /mnt/host/guest && bash install-guest.sh` (нужен sudo; пакеты ставятся через pacman,
    поэтому на момент установки у гостя должен быть временный интернет любым способом).
+   Установщик также запускает `configure-location.sh`: по `ipinfo.io` проверяет, что выходом
+   является именно VDS, выставляет его часовой пояс и сохраняет город/координаты
+   через `omarchy-weather-location --set`. Не заменяй это автоопределением `wttr.in`: его GeoIP
+   может ошибочно считать VDS российским. После смены VDS повтори `bash configure-location.sh`.
 6. Удалить старые per-app настройки, если были: `env = *_PROXY` в конфиге Hyprland,
    `git config --global http.proxy`, `ProxyCommand` в `~/.ssh/config`, `XferCommand` в pacman.conf.
 
@@ -91,6 +95,8 @@ ssh -p 2222 `
 
 В госте:
 - `curl https://api.ipify.org` → IP VDS.
+- `timedatectl` → часовой пояс VDS (NTP/UDP через HTTP CONNECT не проходит).
+- `omarchy-weather-location` / `omarchy-weather-status` → город VDS, не ошибочный RU-город.
 - `curl -I https://www.ozon.ru` и `https://www.wildberries.ru` → HTTP 200/301 (direct делает хост).
 - `ping -c2 8.8.8.8` → 100% потерь; `sudo nc -zv -w3 1.1.1.1 443` → отказ/таймаут.
 - Kill switch: `sudo systemctl stop sing-box` → `curl -m 5 https://api.ipify.org` таймаут;

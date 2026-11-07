@@ -61,7 +61,11 @@ $json = $config | ConvertTo-Json -Depth 10
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' `
     -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$dir\omarchy-proxy.ps1`""
 $trigger = New-ScheduledTaskTrigger -AtLogOn
+$taskSettings = New-ScheduledTaskSettingsSet `
+    -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
+    -MultipleInstances IgnoreNew -ExecutionTimeLimit 0
 Register-ScheduledTask -TaskName 'OmarchyProxy' -Action $action -Trigger $trigger `
+    -Settings $taskSettings `
     -Description 'SSH tunnel + sing-box for Omarchy guest (see omarchy-net repo)' -Force | Out-Null
 
 # перезапуск, чтобы подхватить новый конфиг

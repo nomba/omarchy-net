@@ -77,6 +77,37 @@ bash install-guest.sh
 Per-app настройки не нужны: `HTTP_PROXY`, `git config http.proxy`, `ProxyCommand` в ssh,
 `XferCommand` в pacman.conf — всё это удалите, если настраивали раньше.
 
+## Управление с Windows
+
+Один раз установите пользовательскую команду (администратор не нужен):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File host\install-command.ps1
+```
+
+После этого из любого терминала:
+
+```powershell
+omarchy-net status                 # задача, порты и реальный внешний IP
+omarchy-net off                    # остановить туннель и sing-box хоста
+omarchy-net on                     # запустить и дождаться готовности
+omarchy-net ru list                # показать ruDomains
+omarchy-net ru add ngenix.net      # добавить домен или несколько через пробел
+omarchy-net ru remove ngenix.net   # удалить домен или несколько через пробел
+```
+
+`off` останавливает только процессы этого сетапа: интернет в госте исчезает из-за kill switch,
+а Windows-приложения и HAPP не затрагиваются. Это выключение до `on` или следующего входа
+в Windows; автозапуск не удаляется. `status` возвращает 0 для `OK` и 1 для
+`OFF`/`DEGRADED`, поэтому его можно использовать в скриптах.
+
+Добавление и удаление доменов обновляет `settings.json` и перезапускает прокси через
+`install-host.ps1`; Windows запросит подтверждение UAC. Повторное добавление или удаление
+отсутствующего домена ничего не меняет и не перезапускает прокси.
+
+Команда создаётся как `%LOCALAPPDATA%\Microsoft\WindowsApps\omarchy-net.cmd` и указывает на
+`host\manage.ps1` в репозитории. Не перемещайте репозиторий без повторного запуска установщика команды.
+
 ## Эксплуатация
 
 - **Добавить российский сервис:** допишите домен в `ruDomains` в `settings.json`,

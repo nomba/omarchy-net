@@ -1,6 +1,6 @@
 ---
 name: omarchy-net-deploy
-description: Развёртывание, проверка и откат сетевого сетапа omarchy-net (Try Omarchy на Windows: весь трафик гостя через SSH-туннель до VDS, ozon/wb напрямую, строгий файрвол гостя). Используйте этот skill всякий раз, когда пользователь просит установить/настроить/проверить/переустановить/удалить omarchy-net, прокси для Omarchy, туннель до VDS, sing-box на хосте или в госте, или когда упоминаются файлы settings.json, install-host.ps1, install-guest.sh, omarchy-proxy.ps1 из этого репозитория — даже если пользователь не называет skill явно.
+description: Развёртывание, проверка, управление (status/on/off, ruDomains) и откат сетевого сетапа omarchy-net (Try Omarchy на Windows: весь трафик гостя через SSH-туннель до VDS, ozon/wb напрямую, строгий файрвол гостя). Используйте этот skill всякий раз, когда пользователь просит установить/настроить/проверить/переустановить/удалить omarchy-net, прокси для Omarchy, туннель до VDS, sing-box на хосте или в госте, или когда упоминаются файлы settings.json, install-host.ps1, install-guest.sh, omarchy-proxy.ps1 из этого репозитория — даже если пользователь не называет skill явно.
 ---
 
 # omarchy-net-deploy
@@ -98,6 +98,15 @@ ssh -p 2222 `
 
 Если любая проверка не прошла — не объявляйте установку завершённой; диагностируйте по
 `README.md` (раздел Troubleshooting) и логам (`host/proxy.log`, `journalctl -u sing-box`).
+
+## Управление с Windows
+
+После однократного `powershell -ExecutionPolicy Bypass -File host\install-command.ps1`
+используй `omarchy-net status`, `omarchy-net on`, `omarchy-net off` и
+`omarchy-net ru list|add|remove <домен...>`. `status` проверяет не только задачу и порты,
+но и реальный IP через SOCKS. `off` останавливает только процессы сетапа и тем самым
+включает kill switch в госте; HAPP и другие Windows-приложения не затрагиваются.
+Изменение `ruDomains` через CLI запрашивает UAC и перезапускает прокси.
 
 ## Обновление и откат
 

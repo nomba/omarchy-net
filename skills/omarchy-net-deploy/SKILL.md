@@ -1,6 +1,13 @@
 ---
 name: omarchy-net-deploy
-description: Развёртывание, проверка, управление (status/on/off, ruDomains) и откат сетевого сетапа omarchy-net (Try Omarchy на Windows: весь трафик гостя через SSH-туннель до VDS, ozon/wb напрямую, строгий файрвол гостя). Используйте этот skill всякий раз, когда пользователь просит установить/настроить/проверить/переустановить/удалить omarchy-net, прокси для Omarchy, туннель до VDS, sing-box на хосте или в госте, или когда упоминаются файлы settings.json, install-host.ps1, install-guest.sh, omarchy-proxy.ps1 из этого репозитория — даже если пользователь не называет skill явно.
+description: >-
+  Развёртывание, проверка, управление (status/on/off, ruDomains) и откат сетевого
+  сетапа omarchy-net (Try Omarchy на Windows: весь трафик гостя через SSH-туннель
+  до VDS, ozon/wb напрямую, строгий файрвол гостя). Используйте этот skill всякий
+  раз, когда пользователь просит установить/настроить/проверить/переустановить/удалить
+  omarchy-net, прокси для Omarchy, туннель до VDS, sing-box на хосте или в госте,
+  или когда упоминаются файлы settings.json, install-host.ps1, install-guest.sh,
+  omarchy-proxy.ps1 из этого репозитория — даже если пользователь не называет skill явно.
 ---
 
 # omarchy-net-deploy

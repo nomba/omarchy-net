@@ -7,6 +7,12 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+if ! command -v python3 >/dev/null 2>&1; then
+    echo 'Ошибка: требуется предустановленный Python 3 (команда python3).' >&2
+    echo 'В Try Omarchy он входит в зависимости try-omarchy-runtime.' >&2
+    exit 1
+fi
+
 PORT=$(python3 -c "import json;print(json.load(open('../settings.json'))['socksPort'])")
 echo ">> SOCKS-порт хоста: $PORT"
 

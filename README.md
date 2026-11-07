@@ -37,9 +37,14 @@ Omarchy (гость)
 ```powershell
 git clone <url-репозитория> omarchy-net
 cd omarchy-net
-notepad settings.json    # при необходимости: другой VDS, порты, домены
+Copy-Item settings.json settings.local.json
+notepad settings.local.json   # обязательно: vdsHost; при необходимости порты и домены
 powershell -ExecutionPolicy Bypass -File host\install-host.ps1   # от администратора
 ```
+
+`settings.json` — версионируемый шаблон без реального адреса VDS. Персональные параметры
+хранятся в `settings.local.json`, который добавлен в `.gitignore`. Все скрипты используют
+локальный файл, если он существует, иначе — шаблон. Поэтому `git diff` не покажет ваш VDS.
 
 Проверка хоста:
 
@@ -62,7 +67,7 @@ bash install-guest.sh
 ## Время и геолокация по VDS
 
 Гостевой установщик получает через `https://ipinfo.io/json` внешний IP, город, координаты и
-часовой пояс. Ответ принимается только если внешний IP совпадает с `vdsHost` из `settings.json`.
+часовой пояс. Ответ принимается только если внешний IP совпадает с `vdsHost` из активного файла настроек.
 Затем `configure-location.sh`:
 
 - устанавливает часовой пояс через `timedatectl`;
@@ -129,8 +134,8 @@ omarchy-net ru remove ngenix.net   # удалить домен или неско
 в Windows; автозапуск не удаляется. `status` возвращает 0 для `OK` и 1 для
 `OFF`/`DEGRADED`, поэтому его можно использовать в скриптах.
 
-Добавление и удаление доменов обновляет `settings.json` и перезапускает прокси через
-`install-host.ps1`; Windows запросит подтверждение UAC. Повторное добавление или удаление
+Добавление и удаление доменов обновляет активный `settings.local.json` (либо `settings.json`,
+если локального файла нет) и перезапускает прокси через `install-host.ps1`; Windows запросит UAC. Повторное добавление или удаление
 отсутствующего домена ничего не меняет и не перезапускает прокси.
 
 Команда создаётся как `%LOCALAPPDATA%\Microsoft\WindowsApps\omarchy-net.cmd` и указывает на
@@ -138,12 +143,12 @@ omarchy-net ru remove ngenix.net   # удалить домен или неско
 
 ## Эксплуатация
 
-- **Добавить российский сервис:** допишите домен в `ruDomains` в `settings.json`,
+- **Добавить российский сервис:** допишите домен в `ruDomains` в `settings.local.json`,
   повторно запустите `host\install-host.ps1` (идемпотентно, конфиг перегенерируется, сервисы перезапустятся).
 - **Лог и статус:** `Get-Content host\proxy.log -Wait -Tail 20`.
 - **Перечитать конфиг sing-box вручную:** `Get-Process sing-box | Stop-Process -Force` —
   супервизор поднимет его с новым конфигом через 5 секунд.
-- **Обновление sing-box:** поднимите `singBoxVersion` и `singBoxSha256` в `settings.json`
+- **Обновление sing-box:** поднимите `singBoxVersion` и `singBoxSha256` в `settings.local.json`
   (хеш zip-файла релиза), повторите `install-host.ps1`.
 - **Откат:** `host\uninstall-host.ps1` на хосте и `guest\uninstall-guest.sh` в госте.
 

@@ -3,7 +3,13 @@
 # Следит за обоими процессами, перезапускает при падении, при своей остановке гасит обоих.
 
 $root = Split-Path $PSScriptRoot -Parent
-$s = Get-Content "$root\settings.json" -Raw | ConvertFrom-Json
+$settingsPath = Join-Path $root 'settings.local.json'
+if (-not (Test-Path $settingsPath)) { $settingsPath = Join-Path $root 'settings.json' }
+$s = Get-Content $settingsPath -Raw | ConvertFrom-Json
+$vdsHost = [string]$s.vdsHost
+if ([string]::IsNullOrWhiteSpace($vdsHost) -or $vdsHost.Contains('YOUR_VDS_IP')) {
+    throw 'Настройте vdsHost в settings.local.json или settings.json.'
+}
 $dir = $PSScriptRoot
 $log = "$dir\proxy.log"
 

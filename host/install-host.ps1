@@ -1,14 +1,20 @@
 ﻿#requires -RunAsAdministrator
 # Идемпотентная установка Omarchy Proxy на Windows-хост:
 #   1. sing-box pinned-версии с проверкой SHA256 -> host\runtime\
-#   2. host\config.json генерируется из settings.json (не редактируйте его вручную)
+#   2. host\config.json генерируется из settings.local.json / settings.json (не редактируйте его вручную)
 #   3. Задача планировщика OmarchyProxy (автозапуск супервизора при входе)
 # Повторный запуск = обновление конфигурации. Запуск:
 #   powershell -ExecutionPolicy Bypass -File host\install-host.ps1
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
-$s = Get-Content "$root\settings.json" -Raw | ConvertFrom-Json
+$settingsPath = Join-Path $root 'settings.local.json'
+if (-not (Test-Path $settingsPath)) { $settingsPath = Join-Path $root 'settings.json' }
+$s = Get-Content $settingsPath -Raw | ConvertFrom-Json
+$vdsHost = [string]$s.vdsHost
+if ([string]::IsNullOrWhiteSpace($vdsHost) -or $vdsHost.Contains('YOUR_VDS_IP')) {
+    throw 'Настройте vdsHost в settings.local.json или settings.json перед установкой.'
+}
 $dir = $PSScriptRoot
 $runtime = "$dir\runtime"
 $v = $s.singBoxVersion

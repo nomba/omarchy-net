@@ -4,7 +4,15 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-VDS_HOST=$(python3 -c "import json; print(json.load(open('../settings.json'))['vdsHost'])")
+SETTINGS=../settings.local.json
+if [[ ! -f $SETTINGS ]]; then
+    SETTINGS=../settings.json
+fi
+VDS_HOST=$(SETTINGS="$SETTINGS" python3 -c "import json,os; print(json.load(open(os.environ['SETTINGS']))['vdsHost'])")
+if [[ -z $VDS_HOST || $VDS_HOST == *YOUR_VDS_IP* ]]; then
+    echo 'Настройте vdsHost в settings.local.json или settings.json.' >&2
+    exit 1
+fi
 GEO_JSON=$(curl -fsS --connect-timeout 5 --max-time 20 --retry 2 --retry-all-errors 'https://ipinfo.io/json')
 
 # ipinfo должен увидеть именно VDS, иначе нельзя случайно применить GeoIP хоста

@@ -13,7 +13,11 @@ if ! command -v python3 >/dev/null 2>&1; then
     exit 1
 fi
 
-PORT=$(python3 -c "import json;print(json.load(open('../settings.json'))['socksPort'])")
+SETTINGS=../settings.local.json
+if [[ ! -f $SETTINGS ]]; then
+    SETTINGS=../settings.json
+fi
+PORT=$(SETTINGS="$SETTINGS" python3 -c "import json,os;print(json.load(open(os.environ['SETTINGS']))['socksPort'])")
 echo ">> SOCKS-порт хоста: $PORT"
 
 tmpdir=$(mktemp -d)

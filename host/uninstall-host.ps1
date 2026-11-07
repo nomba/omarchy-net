@@ -1,6 +1,6 @@
 ﻿#requires -RunAsAdministrator
 # Полное удаление Omarchy Proxy с хоста: задача, процессы, runtime, сгенерированный конфиг, лог.
-# settings.json и скрипты остаются (репозиторий можно удалить целиком).
+# settings.json, settings.local.json и скрипты остаются (репозиторий можно удалить целиком).
 
 $dir = $PSScriptRoot
 Stop-ScheduledTask -TaskName 'OmarchyProxy' -ErrorAction SilentlyContinue

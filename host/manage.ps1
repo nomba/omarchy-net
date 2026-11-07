@@ -15,13 +15,19 @@ $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $hostDir = $PSScriptRoot
 $root = Split-Path $hostDir -Parent
-$settingsPath = Join-Path $root 'settings.json'
+$settingsPath = Join-Path $root 'settings.local.json'
+if (-not (Test-Path $settingsPath)) { $settingsPath = Join-Path $root 'settings.json' }
 $installerPath = Join-Path $hostDir 'install-host.ps1'
 $taskName = 'OmarchyProxy'
 $idn = New-Object System.Globalization.IdnMapping
 
 function Get-Settings {
-    return Get-Content $settingsPath -Raw | ConvertFrom-Json
+    $s = Get-Content $settingsPath -Raw | ConvertFrom-Json
+    $vdsHost = [string]$s.vdsHost
+    if ([string]::IsNullOrWhiteSpace($vdsHost) -or $vdsHost.Contains('YOUR_VDS_IP')) {
+        throw 'Настройте vdsHost в settings.local.json или settings.json.'
+    }
+    return $s
 }
 
 function Get-ProxyTask {

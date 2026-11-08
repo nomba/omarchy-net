@@ -12,5 +12,9 @@ table inet filter {
         udp sport 68 udp dport 67 accept
         oifname "tun0" accept
         ip daddr 10.0.2.2 tcp dport __SOCKS_PORT__ accept
+        # Try Omarchy: каналы управления лаунчера на хосте (10.0.2.2 = loopback
+        # хоста через slirp; трафик за пределы хоста не уходит, инвариант прокси
+        # не нарушается). 4451 - guest agent, 4448/4449 - буфер обмена.
+        ip daddr 10.0.2.2 tcp dport { 4448, 4449, 4451 } accept
     }
 }
